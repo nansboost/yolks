@@ -31,8 +31,9 @@ RUN         apt update \
                 fonts-liberation \
                 fonts-noto-color-emoji
 
-# global npm tooling (yarn ships with node via corepack - do NOT npm i -g yarn)
-RUN         npm install --global npm@latest typescript ts-node @types/node tsx pm2
+# global npm tooling (NO npm@latest upgrade here: npm 12 rejects node 25 engines;
+# yarn ships with node via corepack - do NOT npm i -g yarn)
+RUN         npm install --global typescript ts-node @types/node tsx pm2
 RUN         npm install -g corepack \
             && corepack enable \
             && corepack prepare pnpm@latest --activate

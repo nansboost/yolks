@@ -1,4 +1,4 @@
-FROM        --platform=$TARGETOS/$TARGETARCH node:23-trixie-slim
+FROM        --platform=$TARGETOS/$TARGETARCH node:23-bookworm-slim
 
 LABEL       author="nansboost"
 LABEL       org.opencontainers.image.source="https://github.com/nansboost/yolks"
