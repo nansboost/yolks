@@ -1,7 +1,7 @@
 # custom nodejs yolks (terminal egg)
 
-Builds 4 Docker images with **Node.js + Chromium (puppeteer-ready) + pm2** and
-pushes them to your own GitHub Container Registry namespace:
+Struktur mengikuti pola resmi [pelican-eggs/yolks](https://github.com/pelican-eggs/yolks),
+dengan tambahan **Chromium (puppeteer-ready) + pm2**:
 
 ```
 ghcr.io/nansboost/yolks:nodejs_22
@@ -10,49 +10,36 @@ ghcr.io/nansboost/yolks:nodejs_24
 ghcr.io/nansboost/yolks:nodejs_25
 ```
 
-## How to use
+## Struktur (mirip resmi)
 
-1. Create a new GitHub repo named `yolks` under **nansboost** (private is
-   fine) and push **the contents of this folder** as the repo root:
-   (repo name `yolks` = package name → package auto-links to the repo)
-   ```bash
-   cd yolks-custom
-   git init && git add -A && git commit -m "custom nodejs yolks"
-   git remote add origin https://github.com/nansboost/yolks.git
-   git push -u origin main
-   ```
-2. The Actions workflow runs automatically (4 parallel builds, one per node
-   version). `GITHUB_TOKEN` handles the ghcr.io login - no PAT needed.
-3. **Make the package public** (first publish is private, wings cannot pull
-   private images):
-   GitHub → your profile → Packages → `yolks` → Package settings →
-   Danger Zone → Change visibility → **Public**.
-4. Point the egg at the new images:
-   ```json
-   "docker_images": {
-     "Node.js 22 + Chromium + PM2": "ghcr.io/nansboost/yolks:nodejs_22",
-     "Node.js 23 + Chromium + PM2": "ghcr.io/nansboost/yolks:nodejs_23",
-     "Node.js 24 + Chromium + PM2": "ghcr.io/nansboost/yolks:nodejs_24",
-     "Node.js 25 + Chromium + PM2": "ghcr.io/nansboost/yolks:nodejs_25"
-   }
-   ```
+```
+.github/workflows/nodejs.yml   # matrix build 22-25, amd64+arm64, push ke GHCR
+nodejs/
+├── entrypoint.sh              # eval $STARTUP dari wings (pola resmi yolks)
+├── 22/Dockerfile              # FROM node:22-trixie-slim + ...
+├── 23/Dockerfile
+├── 24/Dockerfile
+└── 25/Dockerfile
+```
 
-## Inside the image
+## Isi image
 
-- Debian bookworm-slim + official NodeSource node (22/23/24/25)
-- `chromium` (system package, real browser, not the snap stub) + fonts
-- global: `pm2`, `yarn`
-- build tools (make/gcc/g++/python3) so `npm install` can compile native modules
-- `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium` + `PUPPETEER_SKIP_DOWNLOAD=true`
-  → `npm i puppeteer` works instantly, no chrome download at install time
-- `container` user (uid 988), `/home/container` workdir - wings compatible
+- Debian trixie-slim + Node resmi (22/23/24/25), multi-arch amd64+arm64
+- Toolkit resmi yolks: ffmpeg, sqlite3, git, python3, build-essential, tini, dll.
+- Tambahan: **chromium** + fonts (puppeteer siap pakai, tanpa download chrome),
+  global **pm2**, typescript/ts-node/tsx, pnpm via corepack (yarn sudah bawaan)
+- `STOPSIGNAL SIGINT` + `tini` PID-1 + `entrypoint.sh` (eval `$STARTUP`) - persis
+  pola resmi, jadi kompatibel penuh dengan Wings
+- user `container`, `WORKDIR /home/container`
 
-## Notes
+## Publish
 
-- Puppeteer must launch with `--no-sandbox` in containers (running as non-root
-  without user namespaces).
-- To add more global tools (tsx, typescript, nodemon...), extend the
-  `npm install -g pm2 yarn` line in `dockerfiles/nodejs.Dockerfile` and push -
-  Actions rebuilds automatically.
-- The egg's install container can also use the image
+Push repo ini ke `github.com/nansboost/yolks` (branch `main`) → Actions jalan
+otomatis → setelah hijau, set package **Public**
+(profil → Packages → yolks → Package settings → Change visibility → Public).
+
+## Catatan egg
+
+- Puppeteer harus launch dengan `--no-sandbox` di container.
+- Install container egg bisa ikut pakai image ini
   (`scripts.installation.container = ghcr.io/nansboost/yolks:nodejs_22`).
