@@ -29,11 +29,14 @@ RUN         apt update \
                 tini \
                 chromium \
                 fonts-liberation \
-                fonts-noto-color-emoji
+                fonts-noto-color-emoji \
+                imagemagick \
+                webp \
+                golang-go
 
 # global npm tooling (npm pinned: npm 12 rejects node 25 engines;
 # --force on corepack overwrites the bundled yarn shim, official yolks style)
-RUN         npm install --global npm@11.18.0 typescript ts-node @types/node tsx pm2
+RUN         npm install --global npm@11.18.0 typescript ts-node @types/node tsx pm2 bun
 RUN         npm install -g corepack --force
 RUN         corepack enable
 RUN         corepack prepare pnpm@latest --activate

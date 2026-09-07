@@ -29,10 +29,13 @@ RUN         apt update \
                 tini \
                 chromium \
                 fonts-liberation \
-                fonts-noto-color-emoji
+                fonts-noto-color-emoji \
+                imagemagick \
+                webp \
+                golang-go
 
 # global npm tooling (yarn ships with node via corepack - do NOT npm i -g yarn)
-RUN         npm install --global npm@latest typescript ts-node @types/node tsx pm2
+RUN         npm install --global npm@latest typescript ts-node @types/node tsx pm2 bun
 RUN         npm install -g corepack \
             && corepack enable \
             && corepack prepare pnpm@latest --activate
