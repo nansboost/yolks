@@ -31,12 +31,12 @@ RUN         apt update \
                 fonts-liberation \
                 fonts-noto-color-emoji
 
-# global npm tooling (NO npm@latest upgrade here: npm 12 rejects node 25 engines;
-# yarn ships with node via corepack - do NOT npm i -g yarn)
-RUN         npm install --global typescript ts-node @types/node tsx pm2
-RUN         npm install -g corepack \
-            && corepack enable \
-            && corepack prepare pnpm@latest --activate
+# global npm tooling (npm pinned: npm 12 rejects node 25 engines;
+# --force on corepack overwrites the bundled yarn shim, official yolks style)
+RUN         npm install --global npm@11.18.0 typescript ts-node @types/node tsx pm2
+RUN         npm install -g corepack --force
+RUN         corepack enable
+RUN         corepack prepare pnpm@latest --activate
 
 # puppeteer: use the system chromium, skip chrome-for-testing download
 ENV         PUPPETEER_SKIP_DOWNLOAD=true \
